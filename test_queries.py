@@ -1,17 +1,19 @@
-import mysql.connector
+# import mysql.connector
+import datetime
 
-database = mysql.connector.connect(
-    host="us-cdbr-east-02.cleardb.com",
-    user="bd5a2a7ea12005",
-    password="af98e11b",
-    database="heroku_b1552496830e89b"
-)
+# database = mysql.connector.connect(
+#     host="us-cdbr-east-02.cleardb.com",
+#     user="bd5a2a7ea12005",
+#     password="af98e11b",
+#     database="heroku_b1552496830e89b"
+# )
 
-cursor = database.cursor(dictionary=True)
+# cursor = database.cursor(dictionary=True)
 
-cursor.execute(f"SELECT * FROM authors WHERE authors_id = {1}")
-author = cursor.fetchone()
+# cursor.execute(f"INSERT INTO books(books_title, books_author_id, books_date_added) VALUES ('The Titans Curse', 1, CURRENT_DATE());")
+# # author = cursor.fetchone()
 
-print(author)
+# database.commit()
 
-os.getenv("DATABASE_URL"), os.getenv("DATABASE_USER"), os.getenv("DATABASE_PASSWORD"), os.getenv("DATABASE_SCHEMA")
+current_date = datetime.datetime.now()
+print(current_date)
