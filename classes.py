@@ -18,11 +18,10 @@ class DatabaseConnection:
                 database=os.getenv("DATABASE_SCHEMA")
             )
             self.cursor = self.database.cursor(dictionary=True)
-            print("database connected", self.database)
         except mysql.connector.Error as err:
             print(err)
     
-    def db_book_query(self, query, date_time=None, query_vals=None, commit="false"):
+    def db_book_query(self, query, date_time=None, query_vals=None, commit=False):
         if self.database.is_connected():
                 try:
                     self.cursor.execute(query, query_vals)
@@ -56,12 +55,17 @@ class DatabaseConnection:
             print("database not connected")
             return "database not connected"
 
-    def db_author_query(self, query, vals, commit):
+    def db_author_query(self, query, commit=False, vals=None):
         if self.database.is_connected():
             try:
                 self.cursor.execute(query, vals)
+                if commit:
+                    self.database.commit()
+                    self.cursor.execute("SELECT * FROM authors WHERE authors_last_name = %s AND authors_first_name = %s", vals)
+                
                 response = self.cursor.fetchall()
 
+                
                 data = []
                 for author in response:
                     authorObject = {
@@ -72,6 +76,8 @@ class DatabaseConnection:
                     data.append(authorObject)
                 
                 return data
+
+
             except mysql.connector.Error as err:
                 print("Something went wrong: {}".format(err))
                 return err
@@ -82,6 +88,5 @@ class DatabaseConnection:
         if self.database.is_connected():
             self.cursor.close()
             self.database.close()
-            print("database connection closed")
         else:
             print("database not connected")
