@@ -4,9 +4,11 @@ import mysql.connector
 import datetime
 
 from classes import DatabaseConnection
+from auth_blueprint import authentication
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+app.register_blueprint(authentication, url_prefix="/auth")
 
 #*****************Book Rutes********************
 

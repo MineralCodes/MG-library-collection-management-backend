@@ -84,6 +84,33 @@ class DatabaseConnection:
         else:
             return "database not connected"
 
+    def db_create_user(self, query, vals, commit=False):
+        if self.database.is_connected():
+            try:
+                self.cursor.execute(query, vals)
+                
+                if commit:
+                    self.database.commit()
+                
+                return True
+            except mysql.connection.Error as err:
+                print(f"something went wrong: {err}")
+                return False
+    
+    def db_user_auth(self, query, vals=None):
+        if self.database.is_connected():
+            self.cursor.execute(query, vals)
+            
+            results = self.cursor.fetchall()
+
+            content = []
+
+            for result in results:
+                content.append(result)
+        
+        return content[0]
+
+
     def db_close(self):
         if self.database.is_connected():
             self.cursor.close()
