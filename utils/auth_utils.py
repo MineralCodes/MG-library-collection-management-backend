@@ -32,7 +32,8 @@ def validate_user(current_user, password):
 
         if password_hash == saved_password_hash:
             user_id = current_user['users_id']
-            jwt_token = generate_jwt_token({"id": user_id})
+            user_role = current_user['users_role']
+            jwt_token = generate_jwt_token({"id": user_id, "role": user_role})
             return jwt_token
         else:
             return False
@@ -45,3 +46,10 @@ def generate_jwt_token(content):
     encoded_content = jwt.encode(content, JWT_SECRET_KEY, algorithm="HS256")
     token = str(encoded_content).split("'")[1]
     return token
+
+def validate_jwt_token(token):
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+    decoded_content = jwt.decode(token, JWT_SECRET_KEY, algorithm="HS256")
+
+    return decoded_content

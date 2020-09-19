@@ -1,5 +1,5 @@
 from flask import Blueprint, request, Response, jsonify
-from utils import validate_user_input, generate_salt, generate_hash, validate_user
+from utils import auth_utils as au
 from classes import DatabaseConnection
 
 authentication = Blueprint('authentication', __name__)
@@ -10,19 +10,19 @@ def register_user():
     user_password = request.json["password"]
     user_confirm_password = request.json["confirm_password"]
 
-    if user_password == user_confirm_password and validate_user_input(
+    if user_password == user_confirm_password and au.validate_user_input(
         'authentication', email=user_email, password=user_password
     ):
-        password_salt = generate_salt()
-        password_hash = generate_hash(user_password, password_salt)
+        password_salt = au.generate_salt()
+        password_hash = au.generate_hash(user_password, password_salt)
 
-        query = "INSERT INTO users (users_email, users_password, users_password_salt, users_role) VALUES (%s, %s, %s, 'Admin')"
+        query = "INSERT INTO users (users_email, users_password, users_password_salt, users_role) VALUES (%s, %s, %s, 'admin')"
         values = (user_email, password_hash, password_salt)
 
         conn = DatabaseConnection()
 
         conn.db_connect()
-        if conn.db_create_user(query=query, vals=values, commit=True):
+        if conn.db_write(query=query, vals=values):
             return Response(status=200)
         else:
             return Response(status=409)
@@ -40,12 +40,20 @@ def login_user():
 
     conn = DatabaseConnection()
     conn.db_connect()
+
+    current_user = conn.db_read(query=query, vals=values, table="user")
     
-    current_user = conn.db_user_auth(query=query, vals=values)
-    
-    user_token = validate_user(current_user=current_user, password=user_password)
+    user_token = au.validate_user(current_user=current_user[0], password=user_password)
 
     if user_token:
         return jsonify({"jwt_token": user_token})
     else:
         Response(status=401)
+
+
+@authentication.route("/validate", methods=["post"])
+def validate_user_role():
+    token = request.json['jwt_token']
+    decoded = au.validate_jwt_token(token)
+
+    return jsonify({"user_role": decoded['role']})

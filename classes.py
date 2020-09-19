@@ -1,5 +1,6 @@
 import os
 import mysql.connector
+from flask import Response
 
 class DatabaseConnection:
     def __init__(self):
@@ -8,6 +9,36 @@ class DatabaseConnection:
         # self.vals = vals
         self.database = None
         self.cursor = None
+
+
+    def generate_response_object(self, rows, req_type):
+        data = []
+
+        if req_type == "author":
+            for row in rows:
+                res_object = {
+                        "id": row['authors_id'],
+                        "last_name": row['authors_last_name'],
+                        "first_name": row['authors_first_name']
+                    }
+                data.append(res_object)
+        elif req_type == "book":
+            for row in rows:
+                res_object = {
+                            "id": row["books_id"],
+                            "title": row["books_title"],
+                            "author": f"{row['authors_last_name']}, {row['authors_first_name']}",
+                            "publication_year": row["books_pub_year"],
+                            "isbn": row["books_isbn"],
+                            "date_added": row["books_date_added"]
+                        }
+                data.append(res_object)
+        elif req_type == "user":
+            for row in rows:
+                data.append(row)
+        
+        return data
+
 
     def db_connect(self):
         try:
@@ -21,68 +52,32 @@ class DatabaseConnection:
         except mysql.connector.Error as err:
             print(err)
     
-    def db_book_query(self, query, date_time=None, query_vals=None, commit=False):
-        if self.database.is_connected():
-                try:
-                    self.cursor.execute(query, query_vals)
 
-                    if commit:
-                        self.database.commit()
-                        self.cursor.execute("SELECT * FROM books b LEFT JOIN authors a ON b.books_author_id = a.authors_id WHERE b.books_date_added = %s", (date_time,))
-
-                    response = self.cursor.fetchall()
-                    data = []
-
-                    for item in response:
-                        book_object = {
-                            "id": item["books_id"],
-                            "title": item["books_title"],
-                            "author": f"{item['authors_last_name']}, {item['authors_first_name']}",
-                            "publication_year": item["books_pub_year"],
-                            "isbn": item["books_isbn"],
-                            "date_added": item["books_date_added"]
-                        }
-
-                        data.append(book_object)
-                        
-                    return data
-
-                except mysql.connector.Error as err:
-                    print("Something went wrong: {}".format(err))
-                    return err
-
-        else:
-            print("database not connected")
-            return "database not connected"
-
-    def db_author_query(self, query, commit=False, vals=None):
+    def db_read(self, table, query, vals=None):
         if self.database.is_connected():
             try:
                 self.cursor.execute(query, vals)
-                if commit:
-                    self.database.commit()
-                    self.cursor.execute("SELECT * FROM authors WHERE authors_last_name = %s AND authors_first_name = %s", vals)
-                
                 response = self.cursor.fetchall()
 
-                
-                data = []
-                for author in response:
-                    authorObject = {
-                        "id": author['authors_id'],
-                        "last_name": author['authors_last_name'],
-                        "first_name": author['authors_first_name']
-                    }
-                    data.append(authorObject)
-                
-                return data
+                results = self.generate_response_object(response, table)
 
+                return results
 
             except mysql.connector.Error as err:
-                print("Something went wrong: {}".format(err))
-                return err
+                return f"something went wrong: {err}"
+
+    def db_write(self, query, vals):
+        if self.database.is_connected():
+            try:
+                self.cursor.execute(query, vals)
+                self.database.commit()
+                return Response(status=200)
+            except mysql.connector.Error as err:
+                print(f"error in db_write function: {err}")
+                return Response(status=401)
         else:
-            return "database not connected"
+            return Response(status=500)
+
 
     def db_create_user(self, query, vals, commit=False):
         if self.database.is_connected():
@@ -96,19 +91,6 @@ class DatabaseConnection:
             except mysql.connection.Error as err:
                 print(f"something went wrong: {err}")
                 return False
-    
-    def db_user_auth(self, query, vals=None):
-        if self.database.is_connected():
-            self.cursor.execute(query, vals)
-            
-            results = self.cursor.fetchall()
-
-            content = []
-
-            for result in results:
-                content.append(result)
-        
-        return content[0]
 
 
     def db_close(self):
