@@ -17,10 +17,52 @@ def create_author():
 
         conn = DatabaseConnection()
         conn.db_connect()
-        resp = conn.db_author_query(query=query, vals=values, commit=True)
+        resp = conn.db_write(query=query, vals=values)
         conn.db_close()
 
         return jsonify({"authors": resp})
+    else:
+        return Response(status=401)
+
+
+@author.route("/update", methods=["PATCH"])
+def update_author():
+    decoded_token = au.validate_jwt_token(request.json["jwt_token"])
+
+    if decoded_token['role'] == 'admin':
+        data = request.json['form_input']
+
+        author_id = data['author_id']
+        last_name = data['last_name']
+        first_name = data['first_name']
+
+        query = "UPDATE authors SET authors_last_name=%s, authors_first_name=%s WHERE authors_id=%s;"
+        values = (last_name, first_name, author_id)
+
+        conn = DatabaseConnection()
+        conn.db_connect()
+        resp = conn.db_write(query = query, vals = values)
+        conn.db_close()
+
+        return resp
+    else:
+        return Response(status=401)
+
+
+@author.route("/delete", methods=["DELETE"])
+def delete_author():
+    decoded_token = au.validate_jwt_token(request.json["jwt_token"])
+    if decoded_token['role'] == 'admin':
+        
+        query = "DELETE FROM authors WHERE authors_id=%s"
+        values = (request.json["author_id"],)
+
+        conn = DatabaseConnection()
+        conn.db_connect()
+        resp = conn.db_write(query = query, vals = values)
+        conn.db_close()
+
+        return resp
     else:
         return Response(status=401)
 
@@ -31,7 +73,7 @@ def get_all_authors():
 
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_author_query(query=query)
+    resp = conn.db_read(query=query, table="author")
     conn.db_close()
 
     return jsonify({"authors": resp})
@@ -43,7 +85,7 @@ def get_one_author(id):
     values = (id,)
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_author_query(query=query, vals=values)
+    resp = conn.db_read(query=query, vals=values, table="author")
     conn.db_close()
 
     return jsonify({"authors": resp})
@@ -57,8 +99,8 @@ def get_author_biblio(id):
 
     conn = DatabaseConnection()
     conn.db_connect()
-    author = conn.db_author_query(query=author_query, vals=values)
-    books = conn.db_book_query(query=books_query, query_vals=values)
+    author = conn.db_read(query=author_query, vals=values, table="author")
+    books = conn.db_read(query=books_query, vals=values, table="book")
     conn.db_close()
 
     return jsonify({
