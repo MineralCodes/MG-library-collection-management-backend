@@ -7,7 +7,7 @@ book = Blueprint('book', __name__)
 
 @book.route("/create", methods=['post'])
 def create_book_record():
-    decoded_token = au.validate_jwt_token(request.json["jwt_token"])
+    decoded_token = au.validate_jwt_token(request.cookies.get('token'))
 
     if decoded_token['role'] == 'admin':
         data = request.json['form_input']
@@ -33,7 +33,7 @@ def create_book_record():
 
 @book.route("/update", methods=["PATCH"])
 def update_book():
-    decoded_token = au.validate_jwt_token(request.json["jwt_token"])
+    decoded_token = au.validate_jwt_token(request.cookies.get('token'))
     if decoded_token['role'] == 'admin':
         data = request.json['form_input']
 
@@ -42,9 +42,10 @@ def update_book():
         author = data['author']
         isbn = data['isbn']
         pub_year = data['publication_year']
+        description = data['description']
 
-        query = "UPDATE books SET books_title=%s, books_author_id=%s, books_isbn=%s, books_pub_year=%s WHERE books_id=%s;"
-        values = (title, author, isbn, pub_year, book_id)
+        query = "UPDATE books SET books_title=%s, books_author_id=%s, books_isbn=%s, books_pub_year=%s, books_description=%s WHERE books_id=%s;"
+        values = (title, author, isbn, pub_year, book_id, description)
 
         conn = DatabaseConnection()
         conn.db_connect()
@@ -57,7 +58,7 @@ def update_book():
 
 @book.route("/delete", methods=["DELETE"])
 def delete_book():
-    decoded_token = au.validate_jwt_token(request.json["jwt_token"])
+    decoded_token = au.validate_jwt_token(request.cookies.get('token'))
     if decoded_token['role'] == 'admin':
         
         query = "DELETE FROM books WHERE books_id=%s"
@@ -78,7 +79,7 @@ def get_all_books():
     
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_read(table="book", query=query)
+    resp = conn.db_read(format_type="book", query=query)
     conn.db_close()
 
     return jsonify({"books": resp})
@@ -90,7 +91,7 @@ def get_one_book(id):
     vals = (id,)
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_read(table="book", query=query, vals=vals)
+    resp = conn.db_read(format_type="book", query=query, vals=vals)
     conn.db_close()
 
     return jsonify({"books": resp})

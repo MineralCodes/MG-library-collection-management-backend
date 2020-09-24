@@ -1,4 +1,4 @@
-from flask import Blueprint, request, Response, jsonify
+from flask import Blueprint, request, Response, jsonify, make_response
 from utils import auth_utils as au
 from classes import DatabaseConnection
 
@@ -41,19 +41,21 @@ def login_user():
     conn = DatabaseConnection()
     conn.db_connect()
 
-    current_user = conn.db_read(query=query, vals=values, table="user")
+    current_user = conn.db_read(query=query, vals=values, format_type="user")
     
     user_token = au.validate_user(current_user=current_user[0], password=user_password)
+    resp = make_response()
+    resp.set_cookies('token', user_token)
 
     if user_token:
-        return jsonify({"jwt_token": user_token})
+        return resp 
     else:
         Response(status=401)
 
 
 @authentication.route("/validate", methods=["post"])
 def validate_user_role():
-    token = request.json['jwt_token']
+    token = request.cookies.get('token')
     decoded = au.validate_jwt_token(token)
 
     return jsonify({"user_role": decoded['role']})

@@ -11,10 +11,10 @@ class DatabaseConnection:
         self.cursor = None
 
 
-    def generate_response_object(self, rows, req_type):
+    def generate_response_object(self, rows, format_type):
         data = []
 
-        if req_type == "author":
+        if format_type == "author":
             for row in rows:
                 res_object = {
                         "id": row['authors_id'],
@@ -22,18 +22,19 @@ class DatabaseConnection:
                         "first_name": row['authors_first_name']
                     }
                 data.append(res_object)
-        elif req_type == "book":
+        elif format_type == "book":
             for row in rows:
                 res_object = {
                             "id": row["books_id"],
                             "title": row["books_title"],
                             "author": f"{row['authors_last_name']}, {row['authors_first_name']}",
                             "publication_year": row["books_pub_year"],
+                            "description": row['books_description'],
                             "isbn": row["books_isbn"],
                             "date_added": row["books_date_added"]
                         }
                 data.append(res_object)
-        elif req_type == "user":
+        elif format_type == "user":
             for row in rows:
                 data.append(row)
         
@@ -53,13 +54,13 @@ class DatabaseConnection:
             print(err)
     
 
-    def db_read(self, table, query, vals=None):
+    def db_read(self, format_type, query, vals=None):
         if self.database.is_connected():
             try:
                 self.cursor.execute(query, vals)
                 response = self.cursor.fetchall()
 
-                results = self.generate_response_object(response, table)
+                results = self.generate_response_object(response, format_type)
 
                 return results
 

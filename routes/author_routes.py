@@ -6,7 +6,7 @@ author = Blueprint('author', __name__)
 
 @author.route('/create', methods=["POST"])
 def create_author():
-    decoded_token = au.validate_jwt_token(request.json["jwt_token"])
+    decoded_token = au.validate_jwt_token(request.cookies.get('token'))
 
     if decoded_token['role'] == 'admin':
         last_name = request.json['last_name']
@@ -51,7 +51,7 @@ def update_author():
 
 @author.route("/delete", methods=["DELETE"])
 def delete_author():
-    decoded_token = au.validate_jwt_token(request.json["jwt_token"])
+    decoded_token = au.validate_jwt_token(request.cookies.get('token'))
     if decoded_token['role'] == 'admin':
         
         query = "DELETE FROM authors WHERE authors_id=%s"
@@ -73,7 +73,7 @@ def get_all_authors():
 
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_read(query=query, table="author")
+    resp = conn.db_read(query=query, format_type="author")
     conn.db_close()
 
     return jsonify({"authors": resp})
@@ -85,7 +85,7 @@ def get_one_author(id):
     values = (id,)
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_read(query=query, vals=values, table="author")
+    resp = conn.db_read(query=query, vals=values, format_type="author")
     conn.db_close()
 
     return jsonify({"authors": resp})
@@ -99,8 +99,8 @@ def get_author_biblio(id):
 
     conn = DatabaseConnection()
     conn.db_connect()
-    author = conn.db_read(query=author_query, vals=values, table="author")
-    books = conn.db_read(query=books_query, vals=values, table="book")
+    author = conn.db_read(query=author_query, vals=values, format_type="author")
+    books = conn.db_read(query=books_query, vals=values, format_type="book")
     conn.db_close()
 
     return jsonify({
