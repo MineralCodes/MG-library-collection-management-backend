@@ -18,6 +18,10 @@ app.register_blueprint(book_routes.book, url_prefix="/book")
 app.register_blueprint(author_routes.author, url_prefix="/author")
 app.register_blueprint(search_routes.search, url_prefix="/search")
 
+@app.route('/')
+def index():
+    return "<h1>Welcome to our server !!</h1>"
+
 
 @app.route("/test-route", methods=['POST'])
 def test():
