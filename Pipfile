@@ -13,6 +13,7 @@ python-dotenv = "*"
 pyjwt = "*"
 pymysql = "*"
 flask-mysqldb = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
