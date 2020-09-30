@@ -19,7 +19,8 @@ class DatabaseConnection:
                 res_object = {
                         "id": row['authors_id'],
                         "last_name": row['authors_last_name'],
-                        "first_name": row['authors_first_name']
+                        "first_name": row['authors_first_name'],
+                        "full_name": f"{row['authors_last_name']}, {row['authors_first_name']}"
                     }
                 data.append(res_object)
         elif format_type == "book":
