@@ -9,7 +9,7 @@ from routes import author_routes, book_routes, authentication_routes, search_rou
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 
 app.config.from_pyfile('config.py')
 
