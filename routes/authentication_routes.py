@@ -46,7 +46,7 @@ def login_user():
     user_token = au.validate_user(current_user=current_user[0], password=user_password)
     resp = make_response()
     resp.headers["Content-Type"] = "application/json"
-    resp.set_cookie('token', user_token, samesite="Lax", secure=True)
+    resp.set_cookie('token', user_token, secure=True)
 
     if user_token:
         return resp 
