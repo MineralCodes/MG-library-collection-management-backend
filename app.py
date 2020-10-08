@@ -9,7 +9,6 @@ from routes import author_routes, book_routes, authentication_routes, search_rou
 
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 
 app.config.from_pyfile('config.py')
 
@@ -18,6 +17,7 @@ app.register_blueprint(book_routes.book, url_prefix="/book")
 app.register_blueprint(author_routes.author, url_prefix="/author")
 app.register_blueprint(search_routes.search, url_prefix="/search")
 
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 @app.route('/')
 def index():
     return "<h1>Welcome to our server !!</h1>"

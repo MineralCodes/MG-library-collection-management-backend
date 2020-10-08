@@ -8,6 +8,7 @@ book = Blueprint('book', __name__)
 @book.route("/create", methods=['post'])
 def create_book_record():
     decoded_token = au.validate_jwt_token(request.cookies.get('token'))
+    print(decoded_token)
 
     if decoded_token['role'] == 'admin':
         data = request.json['form_input']
@@ -15,7 +16,7 @@ def create_book_record():
         title = data['title']
         author = data['author']
         isbn = data['isbn']
-        pub_year = data['publication_year']
+        pub_year = data['pub_year']
         date = datetime.datetime.now()
 
         query = "INSERT INTO books(books_title, books_author_id, books_isbn, books_pub_year, books_date_added) VALUES (%s, %s, %s, %s, %s);"
