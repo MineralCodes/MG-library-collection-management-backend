@@ -53,6 +53,13 @@ def login_user():
     else:
         Response(status=401)
 
+@authentication.route("/logout", methods=["GET", "POST"])
+def logout_user():
+    resp = make_response()
+    resp.delete_cookie('token')
+
+    return resp
+
 
 @authentication.route("/validate", methods=["post"])
 def validate_user_role():
