@@ -66,4 +66,4 @@ def validate_user_role():
     token = request.cookies.get('token')
     decoded = au.validate_jwt_token(token)
 
-    return jsonify({"user_role": decoded['role']})
+    return jsonify({"user_role": decoded['role'], "user_id": decoded['id'], "email": decoded['email']})
