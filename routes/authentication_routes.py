@@ -43,15 +43,18 @@ def login_user():
 
     current_user = conn.db_read(query=query, vals=values, format_type="user")
     
-    user_token = au.validate_user(current_user=current_user[0], password=user_password)
-    resp = make_response()
-    resp.headers["Content-Type"] = "application/json"
-    resp.set_cookie('token', user_token, secure=True)
+    if len(current_user) > 0:
+        user_token = au.validate_user(current_user=current_user[0], password=user_password)
 
-    if user_token:
-        return resp 
+        if user_token:
+            user = current_user[0]
+            resp = jsonify({"_id": user["users_id"], "email": user["users_email"], "role": user['users_role']})
+            resp.set_cookie('token', user_token, secure=True)
+            return resp 
+        else:
+            return Response(status=401)
     else:
-        Response(status=401)
+        return Response(status=404)
 
 @authentication.route("/logout", methods=["GET", "POST"])
 def logout_user():
