@@ -47,8 +47,7 @@ def login_user():
         user_token = au.validate_user(current_user=current_user[0], password=user_password)
 
         if user_token:
-            user = current_user[0]
-            resp = jsonify({"_id": user["users_id"], "email": user["users_email"], "role": user['users_role']})
+            resp = make_response()
             resp.set_cookie('token', user_token, secure=True)
             return resp 
         else:
@@ -69,4 +68,4 @@ def validate_user_role():
     token = request.cookies.get('token')
     decoded = au.validate_jwt_token(token)
 
-    return jsonify({"user_role": decoded['role'], "user_id": decoded['id'], "email": decoded['email']})
+    return jsonify({"_id": decoded['id'], "role": decoded['role'], "email": decoded['email']})
