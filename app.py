@@ -17,7 +17,7 @@ app.register_blueprint(book_routes.book, url_prefix="/book")
 app.register_blueprint(author_routes.author, url_prefix="/author")
 app.register_blueprint(search_routes.search, url_prefix="/search")
 
-CORS(app, send_wildcard=True, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 @app.route('/')
 def index():
