@@ -17,18 +17,11 @@ app.register_blueprint(book_routes.book, url_prefix="/book")
 app.register_blueprint(author_routes.author, url_prefix="/author")
 app.register_blueprint(search_routes.search, url_prefix="/search")
 
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+CORS(app, send_wildcard=True, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+
 @app.route('/')
 def index():
     return "<h1>Welcome to our server !!</h1>"
-
-
-@app.route("/test-route", methods=['POST'])
-def test():
-    # token = request.json["jwt_token"]
-    # decoded = validate_jwt_token(token)
-
-    return "decoded"
 
 if __name__ == '__main__':
     app.run(threaded=True)
