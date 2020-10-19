@@ -5,7 +5,7 @@ from flask_cors import CORS
 from classes import DatabaseConnection
 # from utils import validate_jwt_token
 
-from routes import author_routes, book_routes, authentication_routes, search_routes
+from routes import author_routes, book_routes, search_routes, authentication_routes
 
 
 app = Flask(__name__)
@@ -17,7 +17,7 @@ app.register_blueprint(book_routes.book, url_prefix="/book")
 app.register_blueprint(author_routes.author, url_prefix="/author")
 app.register_blueprint(search_routes.search, url_prefix="/search")
 
-CORS(app, supports_credentials=True)
+CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True)
 
 @app.route('/')
 def index():

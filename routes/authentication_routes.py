@@ -48,7 +48,8 @@ def login_user():
 
         if user_token:
             resp = make_response()
-            resp.set_cookie('token', user_token, secure=True)
+            resp.headers["content-type"] = "application/json"
+            resp.set_cookie('token', user_token, secure=True, httponly=False)
             return resp 
         else:
             return Response(status=401)
