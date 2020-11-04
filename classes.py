@@ -80,21 +80,6 @@ class DatabaseConnection:
         else:
             return Response(status=500)
 
-
-    def db_create_user(self, query, vals, commit=False):
-        if self.database.is_connected():
-            try:
-                self.cursor.execute(query, vals)
-                
-                if commit:
-                    self.database.commit()
-                
-                return True
-            except mysql.connection.Error as err:
-                print(f"something went wrong: {err}")
-                return False
-
-
     def db_close(self):
         if self.database.is_connected():
             self.cursor.close()

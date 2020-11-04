@@ -33,7 +33,10 @@ def validate_user(current_user, password):
         if password_hash == saved_password_hash:
             user_id = current_user['users_id']
             user_role = current_user['users_role']
-            jwt_token = generate_jwt_token({"id": user_id, "role": user_role})
+            user_email = current_user['users_email']
+
+            jwt_token = generate_jwt_token({"id": user_id, "role": user_role, "email": user_email})
+            
             return jwt_token
         else:
             return False

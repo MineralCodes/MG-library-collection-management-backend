@@ -1,8 +1,11 @@
 from flask import Blueprint, request, Response, jsonify, make_response
 from utils import auth_utils as au
 from classes import DatabaseConnection
+from flask_cors import CORS
 
 authentication = Blueprint('authentication', __name__)
+
+CORS(authentication, supports_credentials=True)
 
 @authentication.route("/register", methods=["POST"])
 def register_user():
@@ -22,6 +25,7 @@ def register_user():
         conn = DatabaseConnection()
 
         conn.db_connect()
+        
         if conn.db_write(query=query, vals=values):
             return Response(status=200)
         else:
@@ -59,4 +63,4 @@ def validate_user_role():
     token = request.cookies.get('token')
     decoded = au.validate_jwt_token(token)
 
-    return jsonify({"user_role": decoded['role']})
+    return jsonify({"_id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']})

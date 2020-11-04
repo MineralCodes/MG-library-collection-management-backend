@@ -1,8 +1,10 @@
 from flask import Blueprint, request, Response, jsonify
 from utils import auth_utils as au
 from classes import DatabaseConnection
+from flask_cors import CORS
 
 author = Blueprint('author', __name__)
+CORS(author, supports_credentials=True)
 
 @author.route('/create', methods=["POST"])
 def create_author():

@@ -2,8 +2,10 @@ from flask import Blueprint, request, Response, jsonify
 from utils import auth_utils as au
 from classes import DatabaseConnection
 import datetime
+from flask_cors import CORS
 
 book = Blueprint('book', __name__)
+CORS(book, supports_credentials=True)
 
 @book.route("/create", methods=['post'])
 def create_book_record():
