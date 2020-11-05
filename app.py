@@ -10,6 +10,7 @@ from routes import author_routes, book_routes, search_routes, authentication_rou
 
 app = Flask(__name__)
 
+
 app.config.from_pyfile('config.py')
 
 app.register_blueprint(authentication_routes.authentication, url_prefix="/auth")

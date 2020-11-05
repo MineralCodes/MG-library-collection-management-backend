@@ -1,7 +1,10 @@
 from flask import Blueprint, request, Response, jsonify
 from classes import DatabaseConnection
+from flask_cors import CORS
 
 search = Blueprint('search', __name__)
+
+CORS(search, supports_credentials=True)
 
 # @search.route("/<search_string>", methods=["GET"])
 # def database_search(search_string):
@@ -15,7 +18,49 @@ def recent_titles():
 
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_read(query = query, format_type = "book")
+    resp = conn.db_read(query=query, format_type="book")
     conn.db_close()
 
     return jsonify({"books": resp})
+
+@search.route("/query", methods={"POST"})
+def search_db():
+    search_string = request.json["search_string"].lower().split("+")
+    terms = ""
+    
+    idx = 0
+    while idx < len(search_string):
+        if idx < (len(search_string) - 1):
+            terms += f"('%{search_string[idx]}%'),"
+            idx += 1
+        elif idx == (len(search_string) - 1):
+            terms += f"('%{search_string[idx]}%')"
+            idx += 1
+
+    create_terms_temp_table_query = "CREATE TEMPORARY TABLE search (term VARCHAR(100));"
+    drop_terms_temp_table_query = "DROP TEMPORARY TABLE search;"
+
+    insert_terms_query = f"INSERT INTO search VALUES {terms};"
+
+    select_books_query = """
+        SELECT COUNT(b.books_id) AS occurance, b.*, a.authors_first_name, a.authors_last_name FROM books b 
+        LEFT JOIN authors a ON b.books_author_id = a.authors_id
+        JOIN search s ON (LOWER(b.books_title) LIKE LOWER(s.term) OR LOWER(a.authors_first_name) LIKE LOWER(s.term) OR LOWER(a.authors_last_name) LIKE LOWER(s.term))
+        GROUP BY b.books_id
+        ORDER BY occurance DESC;
+        """
+    
+    conn = DatabaseConnection()
+    conn.db_connect()
+    
+    create_table = conn.db_write(query=create_terms_temp_table_query)
+    if create_table['result']:
+        insert_terms = conn.db_write(query=insert_terms_query)
+        if insert_terms['result']:
+            resp = conn.db_read(query=select_books_query, format_type="book")
+            conn.db_write(query=drop_terms_temp_table_query)
+            return jsonify({"books": resp })
+        else:
+            return "query terms insert failed"
+    else:
+        return "failed to create terms table"

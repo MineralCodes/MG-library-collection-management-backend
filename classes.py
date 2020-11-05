@@ -52,7 +52,7 @@ class DatabaseConnection:
             )
             self.cursor = self.database.cursor(dictionary=True)
         except mysql.connector.Error as err:
-            print(err)
+            return "error in db_connect fucntion", err
     
 
     def db_read(self, format_type, query, vals=None):
@@ -66,17 +66,17 @@ class DatabaseConnection:
                 return results
 
             except mysql.connector.Error as err:
-                return f"something went wrong: {err}"
+                return f"error in db_read fucntion: {err}"
 
-    def db_write(self, query, vals):
+    def db_write(self, query, vals=None):
         if self.database.is_connected():
             try:
                 self.cursor.execute(query, vals)
                 self.database.commit()
-                return Response(status=200)
+                return { "result": True, "response": 200}
             except mysql.connector.Error as err:
                 print(f"error in db_write function: {err}")
-                return Response(status=401)
+                return {"result": False, "response": 401}
         else:
             return Response(status=500)
 
