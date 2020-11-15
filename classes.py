@@ -32,7 +32,8 @@ class DatabaseConnection:
                             "publication_year": row["books_pub_year"],
                             "description": row['books_description'],
                             "isbn": row["books_isbn"],
-                            "date_added": row["books_date_added"]
+                            "date_added": row["books_date_added"],
+                            "hits": row["hits"] if "hits" in row else 0
                         }
                 data.append(res_object)
         elif format_type == "user":

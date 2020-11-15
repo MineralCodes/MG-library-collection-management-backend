@@ -1,16 +1,10 @@
-from flask import Blueprint, request, Response, jsonify
+from flask import Blueprint, request, Response, jsonify, make_response
 from classes import DatabaseConnection
 from flask_cors import CORS
 
 search = Blueprint('search', __name__)
 
 CORS(search, supports_credentials=True)
-
-# @search.route("/<search_string>", methods=["GET"])
-# def database_search(search_string):
-#     search_term = search_string.tolower()
-    
-#     #TODO create SQL search query for searching multiple fields based on input
 
 @search.route('/recent-titles', methods=["GET"])
 def recent_titles():
@@ -43,11 +37,11 @@ def search_db():
     insert_terms_query = f"INSERT INTO search VALUES {terms};"
 
     select_books_query = """
-        SELECT COUNT(b.books_id) AS occurance, b.*, a.authors_first_name, a.authors_last_name FROM books b 
+        SELECT COUNT(b.books_id) AS hits, b.*, a.authors_first_name, a.authors_last_name FROM books b 
         LEFT JOIN authors a ON b.books_author_id = a.authors_id
         JOIN search s ON (LOWER(b.books_title) LIKE LOWER(s.term) OR LOWER(a.authors_first_name) LIKE LOWER(s.term) OR LOWER(a.authors_last_name) LIKE LOWER(s.term))
         GROUP BY b.books_id
-        ORDER BY occurance DESC;
+        ORDER BY hits DESC;
         """
     
     conn = DatabaseConnection()
@@ -59,8 +53,8 @@ def search_db():
         if insert_terms['result']:
             resp = conn.db_read(query=select_books_query, format_type="book")
             conn.db_write(query=drop_terms_temp_table_query)
-            return jsonify({"books": resp })
+            return make_response({"books": resp}, 200)  ##jsonify({"books": resp })
         else:
-            return "query terms insert failed"
+            return make_response("query terms insert failed", 500)
     else:
-        return "failed to create terms table"
+        return make_response("failed to create terms table", 500)
