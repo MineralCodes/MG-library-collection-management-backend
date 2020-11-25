@@ -1,4 +1,4 @@
-from flask import Blueprint, request, Response, jsonify
+from flask import Blueprint, request, Response, jsonify, make_response
 from utils import auth_utils as au
 from classes import DatabaseConnection
 import datetime
@@ -26,10 +26,19 @@ def create_book_record():
 
         conn = DatabaseConnection()
         conn.db_connect()
-        resp = conn.db_write(query = query, vals = values)
-        conn.db_close()
+        result = conn.db_write(query = query, vals = values)
 
-        return resp
+        if result['status'] == 200:
+            query = "SELECT * FROM books b LEFT JOIN authors a ON b.books_author_id = a.authors_id WHERE b.books_title = %s AND b.books_author_id = %s AND b.books_date_added = %s"
+            values = (title, author, date)
+            book = conn.db_read(query=query, vals=values, format_type="book")
+            conn.db_close()
+
+            return make_response({"books": book}, 200)
+        else:
+            conn.db_close()
+
+            return Response(status=result['status'])
     else:
         return Response(status=401)
 
@@ -52,10 +61,10 @@ def update_book():
 
         conn = DatabaseConnection()
         conn.db_connect()
-        resp = conn.db_write(query = query, vals = values)
+        result = conn.db_write(query = query, vals = values)
         conn.db_close()
 
-        return resp
+        return Response(status=result['status'])
     else:
         return Response(status=401)
 
@@ -69,10 +78,10 @@ def delete_book():
 
         conn = DatabaseConnection()
         conn.db_connect()
-        resp = conn.db_write(query = query, vals = values)
+        result = conn.db_write(query = query, vals = values)
         conn.db_close()
 
-        return resp
+        return Response(status=result['status'])
     else:
         return Response(status=401)
 
@@ -82,10 +91,10 @@ def get_all_books():
     
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_read(format_type="book", query=query)
+    result = conn.db_read(format_type="book", query=query)
     conn.db_close()
 
-    return jsonify({"books": resp})
+    return make_response({"books": result}, 200)
 
 
 @book.route("/<id>", methods=["GET"])
@@ -94,8 +103,8 @@ def get_one_book(id):
     vals = (id,)
     conn = DatabaseConnection()
     conn.db_connect()
-    resp = conn.db_read(format_type="book", query=query, vals=vals)
+    result = conn.db_read(format_type="book", query=query, vals=vals)
     conn.db_close()
 
-    return jsonify({"books": resp})
+    return make_response({"books": result}, 200)
 

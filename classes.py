@@ -79,7 +79,7 @@ class DatabaseConnection:
                 print(f"error in db_write function: {err}")
                 return {"result": False, "response": 401}
         else:
-            return Response(status=500)
+            return {"result": False, "response": 500}
 
     def db_close(self):
         if self.database.is_connected():
