@@ -29,6 +29,7 @@ class DatabaseConnection:
                             "id": row["books_id"],
                             "title": row["books_title"],
                             "author": f"{row['authors_last_name']}, {row['authors_first_name']}",
+                            "author_id": row['authors_id'],
                             "publication_year": row["books_pub_year"],
                             "description": row['books_description'],
                             "isbn": row["books_isbn"],

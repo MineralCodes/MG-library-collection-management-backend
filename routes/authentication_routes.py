@@ -39,9 +39,6 @@ def register_user():
 def login_user():
     user_email = request.json['email']
     user_password = request.json['password']
-    client = request.remote_addr
-
-    print(client)
 
     query = "SELECT * FROM users WHERE users_email = %s"
     values = (user_email,)
@@ -53,7 +50,6 @@ def login_user():
     
     if len(current_user) > 0:
         user_info = current_user[0]
-        print(current_user)
         user_token = au.validate_user(current_user=user_info, password=user_password)
 
         if user_token:
@@ -84,3 +80,50 @@ def validate_user_role():
     decoded = au.validate_jwt_token(token)
 
     return jsonify({"_id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']})
+
+
+@authentication.route("/update-password", methods=["POST"])
+def update_user_password():
+    user_id = request.json['id']
+    old_password = request.json['password']
+    new_password = request.json['new_password']
+    confirm_password = request.json['confirm_password']
+
+    query = "SELECT * FROM users WHERE users_id = %s"
+    
+    conn = DatabaseConnection()
+    conn.db_connect()
+
+
+    current_user = conn.db_read(query=query, vals=(user_id,), format_type="user")
+
+    if len(current_user) > 0:
+        user_info = current_user[0]
+
+        user_password = user_info['users_password']
+        user_password_salt = user_info['users_password_salt']
+
+        old_password_hash = au.generate_hash(old_password, user_password_salt)
+
+        if old_password_hash == user_password:
+            if new_password == confirm_password:
+                new_password_hash = au.generate_hash(new_password, user_password_salt)
+
+                update_query = "UPDATE users SET users_password = %s WHERE users_id = %s"
+                values = (new_password_hash, user_id)
+
+                conn.db_write(query=update_query, vals=values)
+
+                conn.db_close()
+                return Response(status=200)
+            else:
+                conn.db_close()
+                return Response(status=406)
+        else:
+            conn.db_close()
+            return Response(status=401)
+    else:
+        conn.db_close()
+        return Response(status=404)
+
+    
