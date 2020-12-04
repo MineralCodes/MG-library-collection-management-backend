@@ -3,7 +3,7 @@ from hashlib import pbkdf2_hmac
 import jwt
 
 def validate_user_input(input_type, **kwargs):
-    if input_type == 'authentication':
+    if input_type == "authentication":
         if len(kwargs["email"]) <= 255 and len(kwargs["password"]) <= 255:
             return True
         else:
@@ -26,14 +26,14 @@ def generate_hash(text_password, password_salt):
 
 def validate_user(current_user, password):
     if current_user:
-        saved_password_hash = current_user['users_password']
+        saved_password_hash = current_user["users_password"]
         password_salt = current_user["users_password_salt"]
         password_hash = generate_hash(password, password_salt)
 
         if password_hash == saved_password_hash:
-            user_id = current_user['users_id']
-            user_role = current_user['users_role']
-            user_email = current_user['users_email']
+            user_id = current_user["users_id"]
+            user_role = current_user["users_role"]
+            user_email = current_user["users_email"]
 
             jwt_token = generate_jwt_token({"id": user_id, "role": user_role, "email": user_email})
             

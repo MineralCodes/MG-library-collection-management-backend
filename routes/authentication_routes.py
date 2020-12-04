@@ -55,7 +55,7 @@ def login_user():
         if user_token:
             expire_date = datetime.datetime.now()
             expire_date = expire_date + datetime.timedelta(days=365)
-            resp = make_response({"user": {"email": user_info['users_email'], "_id": user_info['users_id'], "user_role": user_info['users_role']}}, 200)
+            resp = make_response({"user": {"email": user_info['users_email'], "id": user_info['users_id'], "user_role": user_info['users_role']}}, 200)
             resp.headers["content-type"] = "application/json"
             resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date)
             return resp 
@@ -79,7 +79,7 @@ def validate_user_role():
     token = request.cookies.get('token')
     decoded = au.validate_jwt_token(token)
 
-    return jsonify({"_id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']})
+    return jsonify({"id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']})
 
 
 @authentication.route("/update-password", methods=["POST"])
@@ -126,4 +126,16 @@ def update_user_password():
         conn.db_close()
         return Response(status=404)
 
+   
+# @authentication.route("/manual-pass", methods=["POST"])
+# def gen_password():
+#     text = request.json["text"]
     
+#     conn = DatabaseConnection()
+#     conn.db_connect()
+#     user = conn.db_read(query="SELECT * FROM users WHERE users_id = 1", format_type="user")
+#     salt = user[0]['users_password_salt']
+
+#     pass_hash = au.generate_hash(text, salt)
+
+#     return make_response({"hash": pass_hash})
