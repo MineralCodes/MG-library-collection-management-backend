@@ -125,17 +125,3 @@ def update_user_password():
     else:
         conn.db_close()
         return Response(status=404)
-
-   
-# @authentication.route("/manual-pass", methods=["POST"])
-# def gen_password():
-#     text = request.json["text"]
-    
-#     conn = DatabaseConnection()
-#     conn.db_connect()
-#     user = conn.db_read(query="SELECT * FROM users WHERE users_id = 1", format_type="user")
-#     salt = user[0]['users_password_salt']
-
-#     pass_hash = au.generate_hash(text, salt)
-
-#     return make_response({"hash": pass_hash})

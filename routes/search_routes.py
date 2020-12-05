@@ -37,7 +37,7 @@ def search_db():
     insert_terms_query = f"INSERT INTO search VALUES {terms};"
 
     select_books_query = """
-        SELECT COUNT(b.books_id) AS hits, b.*, a.authors_first_name, a.authors_last_name FROM books b 
+        SELECT COUNT(b.books_id) AS hits, b.*, a.* FROM books b 
         LEFT JOIN authors a ON b.books_author_id = a.authors_id
         JOIN search s ON (LOWER(b.books_title) LIKE LOWER(s.term) OR LOWER(a.authors_first_name) LIKE LOWER(s.term) OR LOWER(a.authors_last_name) LIKE LOWER(s.term))
         GROUP BY b.books_id
