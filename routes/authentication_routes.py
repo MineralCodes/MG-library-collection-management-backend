@@ -27,12 +27,28 @@ def register_user():
 
         conn.db_connect()
         
-        if conn.db_write(query=query, vals=values):
-            return Response(status=200)
+        created = conn.db_write(query=query, vals=values)
+        if created['result']:
+            user_query = "SELECT * FROM users WHERE users_email = %s"
+            current_user = conn.db_read(query=user_query, vals=(user_email,), format_type="user")
+    
+            if len(current_user) > 0:
+                user_info = current_user[0]
+                user_token = au.validate_user(current_user=user_info, password=user_password)
+
+                if user_token:
+                    expire_date = datetime.datetime.now()
+                    expire_date = expire_date + datetime.timedelta(days=365)
+                    resp = make_response({"user": {"email": user_info['users_email'], "id": user_info['users_id'], "user_role": user_info['users_role']}}, 200)
+                    resp.headers["content-type"] = "application/json"
+                    resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date)
+                    return resp 
+                else:
+                    return Response(status=401)
+            else:
+                return Response(status=400)
         else:
-            return Response(status=409)
-    else:
-        return Response(status=400)
+            return Response(status=400)
 
 
 @authentication.route("/login", methods=["POST"])
