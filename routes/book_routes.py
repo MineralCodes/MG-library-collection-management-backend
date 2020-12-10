@@ -56,7 +56,7 @@ def update_book():
         description = data['description']
 
         query = "UPDATE books SET books_title=%s, books_author_id=%s, books_isbn=%s, books_pub_year=%s, books_description=%s WHERE books_id=%s;"
-        values = (title, author, isbn, pub_year, book_id, description)
+        values = (title, author, isbn, pub_year, description, book_id)
 
         conn = DatabaseConnection()
         conn.db_connect()
