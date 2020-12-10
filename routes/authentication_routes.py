@@ -41,7 +41,7 @@ def register_user():
                     expire_date = expire_date + datetime.timedelta(days=365)
                     resp = make_response({"user": {"email": user_info['users_email'], "id": user_info['users_id'], "user_role": user_info['users_role']}}, 200)
                     resp.headers["content-type"] = "application/json"
-                    resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date, domain='library-collection-backend.herokuapp.com')
+                    resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date, domain='library-collection-api.herokuapp.com')
                     return resp 
                 else:
                     return Response(status=401)
@@ -73,7 +73,7 @@ def login_user():
             expire_date = expire_date + datetime.timedelta(days=365)
             resp = make_response({"user": {"email": user_info['users_email'], "id": user_info['users_id'], "user_role": user_info['users_role']}}, 200)
             resp.headers["content-type"] = "application/json"
-            resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date, domain='library-collection-backend.herokuapp.com')
+            resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date, domain='library-collection-api.herokuapp.com')
             return resp 
         else:
             return Response(status=401)
