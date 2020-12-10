@@ -41,7 +41,7 @@ def register_user():
                     expire_date = expire_date + datetime.timedelta(days=365)
                     resp = make_response({"user": {"email": user_info['users_email'], "id": user_info['users_id'], "user_role": user_info['users_role']}}, 200)
                     resp.headers["content-type"] = "application/json"
-                    resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date, samesite="None")
+                    resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date)
                     return resp 
                 else:
                     return Response(status=401)
@@ -73,7 +73,7 @@ def login_user():
             expire_date = expire_date + datetime.timedelta(days=365)
             resp = make_response({"user": {"email": user_info['users_email'], "id": user_info['users_id'], "user_role": user_info['users_role']}}, 200)
             resp.headers["content-type"] = "application/json"
-            resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date, samesite="None")
+            resp.set_cookie('token', user_token, secure=True, httponly=False, expires=expire_date)
             return resp 
         else:
             return Response(status=401)
@@ -92,10 +92,13 @@ def logout_user():
 
 @authentication.route("/validate", methods=["POST"])
 def validate_user_role():
-    token = request.cookies.get('token')
-    decoded = au.validate_jwt_token(token)
+    if 'token' in request.cookies:
+        token = request.cookies.get('token')
+        decoded = au.validate_jwt_token(token)
 
-    return jsonify({"id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']})
+        return jsonify({"id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']})
+    else:
+        return jsonify({"id": 0, "email": '', "user_role": 'guest'})
 
 
 @authentication.route("/update-password", methods=["POST"])
