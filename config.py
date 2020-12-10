@@ -4,9 +4,9 @@ from dotenv import load_dotenv
 basedir = path.abspath(path.dirname(__file__))
 load_dotenv(path.join(basedir, '.env'))
 
-TESTING = True
-DEBUG = True
-FLASK_ENV = 'development'
+# TESTING = False
+# DEBUG = False
+# FLASK_ENV = 'development'
 CORS_HEADERS = 'Content-Type'
 DATABASE_URL = environ.get("DATABASE_URL")
 DATABASE_USER = environ.get("DATABASE_USER")
