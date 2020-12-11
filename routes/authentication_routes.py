@@ -96,9 +96,9 @@ def validate_user_role():
         token = request.cookies.get('token')
         decoded = au.validate_jwt_token(token)
 
-        return jsonify({"id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']})
+        return jsonify({"user": {"id": decoded['id'], "email": decoded['email'], "user_role": decoded['role']}})
     else:
-        return jsonify({"id": 0, "email": '', "user_role": 'guest'})
+        return jsonify({"user": {"id": 0, "email": '', "user_role": 'guest'}})
 
 
 @authentication.route("/update-password", methods=["POST"])
