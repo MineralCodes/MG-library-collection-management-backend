@@ -85,7 +85,7 @@ def logout_user():
     expire_date = datetime.datetime.now()
     expire_date = expire_date + datetime.timedelta(days=-1)
     resp = make_response()
-    resp.delete_cookie('token')
+    resp.set_cookie('token', "", secure=True, httponly=False, expires=expire_date, samesite="None")
 
     return resp
 
